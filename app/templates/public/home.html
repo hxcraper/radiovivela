@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Radio Vívela — streaming online de música latina, noticias y deportes en vivo desde Chile, las 24 horas.">
+<title>Radio Vívela — Streaming Online 24/7 · Vive la Música de Chile</title>
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2246%22 fill=%22%238B5CF6%22/><circle cx=%2250%22 cy=%2250%22 r=%2214%22 fill=%22%2307040F%22/></svg>">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700;800;900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+/* =============================================================
+   TOKENS — Sistema de diseño
+   ============================================================= */
+:root{
+  --bg:        #07040F;
+  --bg-soft:   #0D0819;
+  --card:      #140F26;
+  --card-2:    #1C1533;
+  --text:      #F5F3FF;
+  --text-dim:  #9C93BF;
+  --accent:    #8B5CF6;   /* morado — acento principal */
+  --accent-2:  #22D3EE;   /* azul neón — acento secundario */
+  --live:      #B91C1C;   /* rojo oscuro — "al aire" */
+  --gold:      #F472B6;   /* magenta — detalle / deportes */
+  --border:    #2A2145;
+  --shadow:    0 2px 10px rgba(0,0,0,.35), 0 12px 32px rgba(0,0,0,.45);
+  --shadow-h:  0 18px 46px rgba(0,0,0,.6);
+  --radius:    16px;
+  --radius-sm: 10px;
+  --font-d:    'Unbounded', sans-serif;
+  --font-b:    'Manrope', system-ui, sans-serif;
+}
+html[data-theme="light"]{
+  --bg:        #F7F5FC;
+  --bg-soft:   #EFEBFA;
+  --card:      #FFFFFF;
+  --card-2:    #F2EEFB;
+  --text:      #150F26;
+  --text-dim:  #635C82;
+  --border:    #E1D9F5;
+  --shadow:    0 1px 3px rgba(30,10,60,.06), 0 10px 26px rgba(30,10,60,.08);
+  --shadow-h:  0 16px 40px rgba(30,10,60,.14);
+}
+
+/* =============================================================
+   RESET & BASE
+   ============================================================= */
+*,*::before,*::after{ box-sizing:border-box; margin:0; padding:0; }
+html{ scroll-behavior:smooth; }
+body{
+  font-family:var(--font-b);
+  background:var(--bg);
+  color:var(--text);
+  transition:background .35s ease,color .35s ease;
+  padding-bottom:88px;
+  overflow-x:hidden;
+}
+img{ display:block; max-width:100%; }
+a{ text-decoration:none; color:inherit; }
+button{ font-family:inherit; }
+ul{ list-style:none; }
+.skip-link{
+  position:absolute; left:-999px; top:0; background:var(--accent); color:#FFFFFF;
+  padding:10px 18px; border-radius:0 0 10px 0; z-index:1000; font-weight:700;
+}
+.skip-link:focus{ left:0; }
+
+::selection{ background:var(--accent); color:#FFFFFF; }
+
+.wrap{ max-width:1240px; margin:0 auto; padding:0 24px; }
+.section{ padding:90px 0; }
+.section-tight{ padding:60px 0; }
+.divider{ height:1px; background:var(--border); }
+
+.reveal{ opacity:0; transform:translateY(24px); transition:opacity .7s ease, transform .7s ease; }
+.reveal.in{ opacity:1; transform:translateY(0); }
+
+/* Section heading */
+.sect-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:36px; flex-wrap:wrap; }
+.eyebrow{
+  display:inline-flex; align-items:center; gap:8px; font-size:.72rem; font-weight:800;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--accent);
+}
+.eyebrow::before{ content:''; width:22px; height:2px; background:var(--accent); border-radius:2px; }
+.sect-title{ font-family:var(--font-d); font-size:clamp(1.7rem,3vw,2.5rem); font-weight:800; letter-spacing:-.02em; margin-top:8px; }
+.sect-sub{ color:var(--text-dim); margin-top:10px; max-width:560px; font-size:.98rem; line-height:1.6; }
+.btn-ghost{
+  font-size:.82rem; font-weight:700; color:var(--text); border:1.5px solid var(--border);
+  border-radius:30px; padding:10px 20px; transition:all .25s; white-space:nowrap;
+}
+.btn-ghost:hover{ border-color:var(--accent); color:var(--accent); background:rgba(139,92,246,.08); }
+
+/* =============================================================
+   HEADER
+   ============================================================= */
+.site-header{
+  position:fixed; top:0; left:0; right:0; z-index:200; height:74px;
+  background:color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  transition:background .3s;
+}
+.hdr-inner{ max-width:1240px; margin:0 auto; height:100%; padding:0 24px; display:flex; align-items:center; justify-content:space-between; gap:20px; }
+
+.logo{ display:flex; align-items:center; gap:10px; }
+.logo-mark{ width:38px; height:38px; border-radius:50%; background:conic-gradient(from 220deg, var(--accent), var(--gold), var(--accent-2), var(--accent)); display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 0 0 3px var(--bg), 0 0 0 4px var(--border); }
+.logo-mark span{ width:14px; height:14px; border-radius:50%; background:var(--bg); }
+.logo-word{ font-family:var(--font-d); font-size:1.35rem; font-weight:800; letter-spacing:-.02em; line-height:1; }
+.logo-freq{ display:block; font-family:var(--font-b); font-size:.62rem; font-weight:700; letter-spacing:.08em; color:var(--text-dim); margin-top:2px; }
+
+.main-nav{ display:flex; align-items:center; gap:2px; }
+.nav-a{ font-size:.85rem; font-weight:600; color:var(--text-dim); padding:10px 14px; border-radius:9px; transition:all .2s; }
+.nav-a:hover, .nav-a.active{ color:var(--text); background:var(--card); }
+
+.hdr-actions{ display:flex; align-items:center; gap:8px; }
+.icon-btn{
+  width:40px; height:40px; border:none; background:transparent; color:var(--text-dim);
+  border-radius:10px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition:all .2s;
+}
+.icon-btn:hover{ color:var(--accent); background:var(--card); }
+.menu-btn{ display:none; }
+.hdr-live{
+  display:flex; align-items:center; gap:8px; background:rgba(251,69,112,.12); border:1px solid rgba(251,69,112,.35);
+  border-radius:24px; padding:8px 14px 8px 10px; font-size:.72rem; font-weight:800; letter-spacing:.06em; color:var(--live);
+}
+.hdr-live .dot{ width:7px; height:7px; border-radius:50%; background:var(--live); animation:pulse-live 1.4s ease-in-out infinite; }
+@keyframes pulse-live{ 0%,100%{opacity:1} 50%{opacity:.35} }
+
+/* =============================================================
+   HERO
+   ============================================================= */
+.hero{ padding:150px 0 90px; position:relative; overflow:hidden; }
+.hero::before{
+  content:''; position:absolute; top:-200px; right:-200px; width:600px; height:600px; border-radius:50%;
+  background:radial-gradient(circle, rgba(139,92,246,.18), transparent 70%); pointer-events:none;
+}
+.hero-grid{ display:grid; grid-template-columns:1.1fr .9fr; gap:60px; align-items:center; position:relative; z-index:1; }
+.hero-eyebrow{ display:inline-flex; align-items:center; gap:10px; background:var(--card); border:1px solid var(--border); border-radius:30px; padding:8px 16px 8px 8px; font-size:.75rem; font-weight:700; color:var(--text-dim); }
+.hero-eyebrow .badge-pill{ background:var(--accent); color:#FFFFFF; font-weight:800; border-radius:20px; padding:4px 10px; font-size:.68rem; letter-spacing:.04em; }
+.hero-title{ font-family:var(--font-d); font-size:clamp(2.8rem,6.4vw,5.2rem); font-weight:900; line-height:.95; letter-spacing:-.03em; margin-top:20px; }
+.hero-title em{
+  font-style:normal;
+  background:linear-gradient(100deg, var(--accent), var(--accent-2) 65%, var(--accent));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.hero-slogan{ font-size:1.15rem; color:var(--text-dim); margin-top:22px; max-width:480px; line-height:1.6; }
+.hero-cta{ display:flex; align-items:center; gap:14px; margin-top:34px; flex-wrap:wrap; }
+.btn-primary{
+  display:inline-flex; align-items:center; gap:10px; background:var(--accent); color:#FFFFFF; font-weight:800;
+  font-size:.9rem; padding:15px 26px; border-radius:30px; border:none; cursor:pointer; transition:all .25s;
+  box-shadow:0 8px 24px rgba(139,92,246,.28);
+}
+.btn-primary:hover{ transform:translateY(-2px); box-shadow:0 12px 30px rgba(139,92,246,.4); }
+.hero-stats{ display:flex; gap:34px; margin-top:46px; flex-wrap:wrap; }
+.hero-stat b{ display:block; font-family:var(--font-d); font-size:1.7rem; font-weight:800; }
+.hero-stat span{ font-size:.75rem; color:var(--text-dim); font-weight:600; text-transform:uppercase; letter-spacing:.05em; }
+
+/* Visual de streaming en vivo — elemento firma (reemplaza el dial de sintonización) */
+.stream-visual-wrap{ position:relative; display:flex; align-items:center; justify-content:center; }
+.stream-visual{
+  position:relative; width:100%; max-width:420px; aspect-ratio:1; border-radius:28px;
+  background:linear-gradient(160deg, var(--card), var(--card-2)); border:1px solid var(--border);
+  box-shadow:var(--shadow-h); overflow:hidden; display:flex; align-items:flex-end; justify-content:center;
+}
+.stream-visual::before{
+  content:''; position:absolute; top:-30%; left:-10%; width:70%; height:70%;
+  background:radial-gradient(circle, rgba(139,92,246,.25), transparent 70%); pointer-events:none;
+}
+.spectrum-bars{ display:flex; align-items:flex-end; justify-content:center; gap:5px; height:52%; width:100%; padding:0 30px; position:relative; z-index:1; }
+.spectrum-bars span{ flex:1; min-width:4px; max-width:10px; border-radius:6px; background:linear-gradient(180deg, var(--accent-2), var(--accent)); animation:bar-bounce 1.4s ease-in-out infinite; }
+@keyframes bar-bounce{ 0%,100%{ transform:scaleY(.25);} 50%{ transform:scaleY(1);} }
+@media (prefers-reduced-motion: reduce){ .spectrum-bars span{ animation:none; transform:scaleY(.7); } }
+.stream-badge{ position:absolute; bottom:0; left:0; right:0; padding:24px 24px 28px; background:linear-gradient(0deg, rgba(7,4,15,.94), transparent); text-align:center; z-index:1; }
+.live-chip{ display:inline-flex; align-items:center; gap:6px; background:rgba(185,28,28,.15); border:1px solid rgba(185,28,28,.4); color:var(--live); font-size:.68rem; font-weight:800; letter-spacing:.08em; padding:5px 12px; border-radius:20px; }
+.live-chip .dot{ width:6px; height:6px; border-radius:50%; background:var(--live); animation:pulse-live 1.4s ease-in-out infinite; }
+.stream-badge b{ display:block; font-family:var(--font-d); font-size:1.6rem; font-weight:700; margin-top:10px; color:var(--text); }
+.stream-badge span.stream-sub{ font-size:.75rem; color:var(--text-dim); }
+
+/* =============================================================
+   ON AIR strip
+   ============================================================= */
+.onair-strip{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px 26px; display:flex; align-items:center; gap:18px; margin-top:70px; box-shadow:var(--shadow); }
+.onair-eq{ display:flex; align-items:flex-end; gap:3px; height:22px; flex-shrink:0; }
+.onair-eq i{ width:4px; border-radius:2px; background:linear-gradient(180deg, var(--accent-2), var(--accent)); display:block; animation:eq-dance ease-in-out infinite alternate; }
+.onair-eq i:nth-child(1){ height:10px; animation-duration:.5s; }
+.onair-eq i:nth-child(2){ height:20px; animation-duration:.7s; }
+.onair-eq i:nth-child(3){ height:8px; animation-duration:.4s; }
+.onair-eq i:nth-child(4){ height:16px; animation-duration:.6s; }
+@keyframes eq-dance{ from{ transform:scaleY(.3);} to{ transform:scaleY(1);} }
+.onair-txt b{ font-size:.95rem; font-weight:800; }
+.onair-txt span{ font-size:.8rem; color:var(--text-dim); }
+.onair-strip .btn-ghost{ margin-left:auto; }
+.listener-pill{
+  display:flex; align-items:center; gap:7px; background:rgba(34,211,238,.1); border:1px solid rgba(34,211,238,.3);
+  color:var(--accent-2); font-size:.78rem; font-weight:700; padding:8px 14px; border-radius:20px; white-space:nowrap; flex-shrink:0;
+}
+#listener-count{ font-variant-numeric:tabular-nums; }
+
+/* =============================================================
+   PROGRAMACIÓN
+   ============================================================= */
+.day-tabs{ display:flex; gap:8px; margin-bottom:28px; flex-wrap:wrap; }
+.day-tab{ font-size:.82rem; font-weight:700; color:var(--text-dim); background:var(--card); border:1px solid var(--border); padding:10px 18px; border-radius:30px; cursor:pointer; transition:all .2s; }
+.day-tab:hover{ color:var(--text); }
+.day-tab.active{ background:var(--accent); color:#FFFFFF; border-color:var(--accent); }
+
+.sched-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+.sched-card{
+  display:flex; gap:18px; align-items:center; background:var(--card); border:1px solid var(--border);
+  border-radius:var(--radius); padding:18px 20px; transition:all .25s; position:relative; overflow:hidden;
+}
+.sched-card:hover{ border-color:var(--accent); transform:translateY(-3px); box-shadow:var(--shadow); }
+.sched-card.now{ border-color:var(--live); background:linear-gradient(90deg, rgba(251,69,112,.08), transparent 60%); }
+.sched-time{ font-family:var(--font-d); font-weight:800; font-size:1.05rem; color:var(--accent); white-space:nowrap; min-width:96px; }
+.sched-info h3{ font-size:1rem; font-weight:800; }
+.sched-info p{ font-size:.8rem; color:var(--text-dim); margin-top:3px; }
+.sched-now-tag{ margin-left:auto; background:var(--live); color:#fff; font-size:.62rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; padding:4px 10px; border-radius:20px; display:flex; align-items:center; gap:5px; flex-shrink:0; }
+.sched-now-tag .dot{ width:5px; height:5px; border-radius:50%; background:#fff; animation:pulse-live 1.4s ease-in-out infinite; }
+
+/* =============================================================
+   LOCUTORES
+   ============================================================= */
+.hosts-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:22px; }
+.host-card{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; transition:all .3s; }
+.host-card:hover{ transform:translateY(-6px); box-shadow:var(--shadow-h); border-color:var(--accent); }
+.host-photo{ position:relative; aspect-ratio:4/5; overflow:hidden; }
+.host-photo img{ width:100%; height:100%; object-fit:cover; transition:transform .6s; }
+.host-card:hover .host-photo img{ transform:scale(1.06); }
+.host-photo::after{ content:''; position:absolute; inset:0; background:linear-gradient(to top, rgba(10,12,20,.85), transparent 55%); }
+.host-show{ position:absolute; left:16px; bottom:14px; font-size:.68rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--accent); background:rgba(10,12,20,.65); padding:5px 10px; border-radius:20px; }
+.host-body{ padding:18px 20px 22px; }
+.host-body h3{ font-family:var(--font-d); font-size:1.15rem; font-weight:700; }
+.host-body p{ font-size:.82rem; color:var(--text-dim); margin-top:6px; line-height:1.55; }
+.host-social{ display:flex; gap:8px; margin-top:14px; }
+.host-social a{ width:32px; height:32px; border-radius:9px; background:var(--card-2); display:flex; align-items:center; justify-content:center; color:var(--text-dim); transition:all .2s; }
+.host-social a:hover{ background:var(--accent); color:#FFFFFF; }
+
+/* =============================================================
+   NOTICIAS
+   ============================================================= */
+.news-grid{ display:grid; grid-template-columns:1.3fr 1fr 1fr; gap:20px; }
+.news-card{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; cursor:pointer; transition:all .25s; display:flex; flex-direction:column; }
+.news-card:hover{ transform:translateY(-5px); box-shadow:var(--shadow-h); border-color:var(--accent); }
+.news-card.feat{ grid-row:span 2; }
+.news-img-wrap{ overflow:hidden; position:relative; }
+.news-card.feat .news-img-wrap{ aspect-ratio:16/12; }
+.news-card:not(.feat) .news-img-wrap{ aspect-ratio:16/9; }
+.news-img-wrap img{ width:100%; height:100%; object-fit:cover; transition:transform .5s; }
+.news-card:hover .news-img-wrap img{ transform:scale(1.06); }
+.news-tag{ position:absolute; top:14px; left:14px; font-size:.62rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:#FFFFFF; background:var(--accent); padding:5px 10px; border-radius:20px; }
+.news-body{ padding:20px; display:flex; flex-direction:column; gap:8px; flex:1; }
+.news-card.feat .news-body h3{ font-size:1.4rem; }
+.news-body h3{ font-family:var(--font-d); font-size:1.05rem; font-weight:700; line-height:1.3; }
+.news-body p{ font-size:.83rem; color:var(--text-dim); line-height:1.55; }
+.news-date{ font-size:.72rem; color:var(--text-dim); margin-top:auto; font-weight:600; }
+
+/* =============================================================
+   REDES SOCIALES
+   ============================================================= */
+.social-grid{ display:grid; grid-template-columns:repeat(5,1fr); gap:16px; }
+.social-card{
+  background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:26px 18px;
+  display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px; transition:all .25s;
+}
+.social-card:hover{ transform:translateY(-6px); box-shadow:var(--shadow-h); }
+.social-ic{ width:54px; height:54px; border-radius:16px; display:flex; align-items:center; justify-content:center; color:#fff; }
+.social-card h4{ font-size:.9rem; font-weight:800; }
+.social-card span{ font-size:.75rem; color:var(--text-dim); }
+.ic-fb{ background:#1877F2; } .ic-ig{ background:linear-gradient(45deg,#F58529,#DD2A7B,#8134AF,#515BD4); }
+.ic-tt{ background:#07040F; border:1px solid var(--border); } html[data-theme="light"] .ic-tt{ background:#150F26; }
+.ic-yt{ background:#FF0000; } .ic-wa{ background:#25D366; }
+
+/* =============================================================
+   COMUNIDAD
+   ============================================================= */
+.community-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+.community-card{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:26px; transition:all .25s; }
+.community-card:hover{ transform:translateY(-4px); border-color:var(--accent); box-shadow:var(--shadow); }
+.community-card p{ font-size:.9rem; line-height:1.6; color:var(--text); }
+.community-card footer{ display:flex; align-items:center; gap:12px; margin-top:18px; }
+.community-avatar{ width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg, var(--accent), var(--accent-2)); display:flex; align-items:center; justify-content:center; font-size:.72rem; font-weight:800; color:#fff; flex-shrink:0; }
+.community-card cite{ font-style:normal; font-size:.85rem; font-weight:800; display:block; }
+.community-card footer span:last-child{ font-size:.72rem; color:var(--text-dim); }
+
+/* =============================================================
+   TENDENCIAS — Ranking + Destacado del día
+   ============================================================= */
+.trending-grid{ display:grid; grid-template-columns:1.3fr .8fr; gap:24px; align-items:stretch; }
+.trending-list{ display:flex; flex-direction:column; gap:10px; }
+.trending-item{
+  display:flex; align-items:center; gap:16px; background:var(--card); border:1px solid var(--border);
+  border-radius:var(--radius-sm); padding:14px 18px; transition:all .25s;
+}
+.trending-item:hover{ border-color:var(--accent); transform:translateX(4px); }
+.trending-rank{ font-family:var(--font-d); font-size:1.1rem; font-weight:700; color:var(--accent-2); width:34px; flex-shrink:0; }
+.trending-info{ min-width:150px; flex-shrink:0; }
+.trending-info h3{ font-size:.92rem; font-weight:800; }
+.trending-info p{ font-size:.72rem; color:var(--text-dim); margin-top:2px; }
+.trending-bar{ flex:1; height:6px; border-radius:4px; background:var(--card-2); overflow:hidden; }
+.trending-bar span{ display:block; height:100%; border-radius:4px; background:linear-gradient(90deg, var(--accent), var(--accent-2)); }
+.trending-plays{ font-family:var(--font-b); font-size:.72rem; font-weight:700; color:var(--text-dim); width:48px; text-align:right; flex-shrink:0; }
+
+.spotlight-card{
+  background:linear-gradient(160deg, var(--card), var(--card-2)); border:1px solid var(--border);
+  border-radius:var(--radius); padding:28px; display:flex; flex-direction:column; box-shadow:var(--shadow);
+}
+.spotlight-host{ display:flex; align-items:center; gap:14px; margin-top:16px; }
+.spotlight-host img{ width:56px; height:56px; border-radius:50%; object-fit:cover; border:2px solid var(--accent); }
+.spotlight-host h3{ font-family:var(--font-d); font-size:1.05rem; font-weight:700; }
+.spotlight-host span{ font-size:.78rem; color:var(--accent-2); font-weight:700; }
+.spotlight-quote{ font-size:.85rem; color:var(--text-dim); line-height:1.6; margin:18px 0 22px; flex:1; }
+.spotlight-btn{ align-self:flex-start; }
+
+/* =============================================================
+   CONTACTO
+   ============================================================= */
+.contact-grid{ display:grid; grid-template-columns:.85fr 1.15fr; gap:50px; align-items:start; }
+.contact-info h3{ font-family:var(--font-d); font-size:1.5rem; font-weight:800; margin-bottom:14px; }
+.contact-info p{ color:var(--text-dim); line-height:1.65; margin-bottom:26px; }
+.contact-line{ display:flex; gap:14px; align-items:flex-start; padding:14px 0; border-top:1px solid var(--border); }
+.contact-line:first-of-type{ border-top:none; }
+.contact-line .ic{ width:38px; height:38px; border-radius:10px; background:var(--card); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; color:var(--accent); flex-shrink:0; }
+.contact-line b{ display:block; font-size:.85rem; font-weight:700; }
+.contact-line span{ font-size:.8rem; color:var(--text-dim); }
+
+.brand-panel{
+  margin-top:28px; background:linear-gradient(145deg, rgba(139,92,246,.12), rgba(34,211,238,.06));
+  border:1px solid rgba(139,92,246,.3); border-radius:var(--radius); padding:22px 24px;
+}
+.brand-panel p{ font-size:.85rem; color:var(--text-dim); margin:10px 0 18px; line-height:1.6; }
+.brand-stats{ display:flex; gap:24px; }
+.brand-stats b{ display:block; font-family:var(--font-d); font-size:1.15rem; font-weight:700; color:var(--accent-2); }
+.brand-stats span{ font-size:.68rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:.05em; }
+
+.contact-form{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:34px; box-shadow:var(--shadow); }
+.form-row{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.field{ margin-bottom:18px; display:flex; flex-direction:column; gap:7px; }
+.field label{ font-size:.78rem; font-weight:700; color:var(--text-dim); }
+.field input, .field select, .field textarea{
+  background:var(--bg-soft); border:1.5px solid var(--border); border-radius:10px; padding:12px 14px;
+  color:var(--text); font-family:inherit; font-size:.9rem; outline:none; transition:border-color .2s; resize:vertical;
+}
+.field input:focus, .field select:focus, .field textarea:focus{ border-color:var(--accent); }
+.field .err{ font-size:.72rem; color:var(--live); min-height:14px; }
+.form-submit{ width:100%; justify-content:center; margin-top:6px; }
+.form-note{ font-size:.78rem; color:var(--text-dim); text-align:center; margin-top:14px; min-height:18px; }
+.form-note.ok{ color:var(--accent-2); font-weight:700; }
+
+/* =============================================================
+   FOOTER
+   ============================================================= */
+.site-footer{ background:var(--bg-soft); border-top:1px solid var(--border); padding:60px 0 26px; margin-top:40px; }
+.foot-top{ display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:40px; padding-bottom:40px; }
+.foot-brand p{ color:var(--text-dim); font-size:.85rem; line-height:1.6; margin-top:14px; max-width:280px; }
+.foot-social{ display:flex; gap:10px; margin-top:20px; }
+.foot-social a{ width:36px; height:36px; border-radius:10px; background:var(--card); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; color:var(--text-dim); transition:all .2s; }
+.foot-social a:hover{ color:var(--accent); border-color:var(--accent); }
+.foot-col h5{ font-size:.75rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--text-dim); margin-bottom:16px; }
+.foot-col a{ display:block; font-size:.85rem; color:var(--text); opacity:.85; padding:6px 0; transition:opacity .2s, color .2s; }
+.foot-col a:hover{ opacity:1; color:var(--accent); }
+.foot-bottom{ border-top:1px solid var(--border); padding-top:24px; display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+.foot-legal{ font-size:.75rem; color:var(--text-dim); line-height:1.6; max-width:640px; }
+.to-top{ width:42px; height:42px; border-radius:50%; background:var(--card); border:1px solid var(--border); color:var(--text-dim); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .2s; }
+.to-top:hover{ color:var(--accent); border-color:var(--accent); transform:translateY(-3px); }
+
+/* =============================================================
+   REPRODUCTOR — Fijo inferior
+   ============================================================= */
+.radio-player{
+  position:fixed; bottom:0; left:0; right:0; z-index:1000; height:80px;
+  background:#05030C; border-top:1px solid rgba(139,92,246,.18);
+  display:flex; align-items:center; padding:0 26px; gap:20px;
+}
+.p-info{ display:flex; align-items:center; gap:16px; flex:1; min-width:0; }
+.live-badge{ display:flex; align-items:center; gap:6px; background:rgba(251,69,112,.15); border:1px solid rgba(251,69,112,.35); border-radius:20px; padding:6px 12px; flex-shrink:0; }
+.live-dot{ width:6px; height:6px; background:var(--live); border-radius:50%; animation:pulse-live 1.4s ease-in-out infinite; }
+.live-txt{ font-size:.63rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--live); }
+.equalizer{ display:flex; align-items:flex-end; gap:3px; height:24px; flex-shrink:0; }
+.eq-bar{ width:4px; border-radius:2px; background:linear-gradient(180deg, var(--accent-2), var(--accent)); transform-origin:bottom; animation:eq-dance2 0s ease-in-out infinite alternate; }
+.eq-bar.paused{ animation-play-state:paused !important; height:4px !important; }
+.eq-bar:nth-child(1){ animation-duration:.4s; height:16px; }
+.eq-bar:nth-child(2){ animation-duration:.6s; animation-delay:.1s; height:24px; }
+.eq-bar:nth-child(3){ animation-duration:.35s; animation-delay:.05s; height:12px; }
+.eq-bar:nth-child(4){ animation-duration:.55s; animation-delay:.15s; height:20px; }
+@keyframes eq-dance2{ from{ transform:scaleY(.35);} to{ transform:scaleY(1);} }
+.p-label{ min-width:0; }
+.p-label .p-name{ font-size:.92rem; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.p-label .p-sub{ font-size:.72rem; color:rgba(255,255,255,.5); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+.p-center{ display:flex; justify-content:center; align-items:center; flex-shrink:0; }
+.play-btn{ width:52px; height:52px; border-radius:50%; background:var(--accent); border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .2s; color:#FFFFFF; }
+.play-btn:hover{ transform:scale(1.08); box-shadow:0 0 22px rgba(139,92,246,.5); }
+.play-btn .pause-icon{ display:none; }
+.play-btn.playing .play-icon{ display:none; }
+.play-btn.playing .pause-icon{ display:block; }
+.play-btn.loading{ opacity:.6; pointer-events:none; }
+
+.p-right{ flex:1; display:flex; justify-content:flex-end; align-items:center; gap:12px; }
+.vol-slider{ -webkit-appearance:none; width:100px; height:4px; border-radius:2px; background:rgba(255,255,255,.2); outline:none; cursor:pointer; }
+.vol-slider::-webkit-slider-thumb{ -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:#fff; cursor:pointer; }
+.vol-slider::-moz-range-thumb{ width:14px; height:14px; border-radius:50%; background:#fff; cursor:pointer; border:none; }
+
+/* =============================================================
+   TOAST
+   ============================================================= */
+.toast{ position:fixed; top:90px; right:24px; background:var(--card); border:1px solid var(--border); border-left:4px solid var(--accent-2); border-radius:10px; padding:14px 20px; box-shadow:var(--shadow-h); font-size:.85rem; font-weight:600; z-index:2000; transform:translateX(140%); transition:transform .35s ease; }
+.toast.show{ transform:translateX(0); }
+
+/* =============================================================
+   RESPONSIVE
+   ============================================================= */
+@media(max-width:1024px){
+  .hero-grid{ grid-template-columns:1fr; }
+  .stream-visual-wrap{ order:-1; max-width:280px; margin:0 auto 20px; }
+  .trending-grid{ grid-template-columns:1fr; }
+  .hosts-grid{ grid-template-columns:repeat(2,1fr); }
+  .news-grid{ grid-template-columns:1fr 1fr; }
+  .news-card.feat{ grid-column:span 2; grid-row:auto; }
+  .news-card.feat .news-img-wrap{ aspect-ratio:21/9; }
+  .social-grid{ grid-template-columns:repeat(3,1fr); }
+  .community-grid{ grid-template-columns:1fr; }
+  .contact-grid{ grid-template-columns:1fr; }
+  .foot-top{ grid-template-columns:1.4fr 1fr 1fr; }
+  .foot-col:last-child{ grid-column:span 1; }
+}
+@media(max-width:768px){
+  .main-nav{ display:none; position:absolute; top:74px; left:0; right:0; flex-direction:column; align-items:stretch;
+    background:var(--bg); border-bottom:1px solid var(--border); padding:14px; box-shadow:var(--shadow-h); gap:4px; }
+  .main-nav.mobile-open{ display:flex; }
+  .nav-a{ padding:13px 14px; }
+  .menu-btn{ display:flex; }
+  .hdr-live{ display:none; }
+  .hero{ padding:120px 0 60px; }
+  .hero-stats{ gap:24px; }
+  .onair-strip{ flex-wrap:wrap; }
+  .onair-strip .btn-ghost{ margin-left:0; width:100%; text-align:center; }
+  .sched-grid{ grid-template-columns:1fr; }
+  .trending-item{ flex-wrap:wrap; }
+  .trending-info{ min-width:0; flex:1 1 60%; }
+  .trending-bar{ order:4; flex-basis:100%; margin-top:8px; }
+  .trending-plays{ text-align:left; }
+  .hosts-grid{ grid-template-columns:1fr 1fr; gap:14px; }
+  .news-grid{ grid-template-columns:1fr; }
+  .news-card.feat{ grid-column:span 1; }
+  .news-card.feat .news-img-wrap{ aspect-ratio:16/10; }
+  .social-grid{ grid-template-columns:repeat(2,1fr); }
+  .community-grid{ grid-template-columns:1fr; }
+  .form-row{ grid-template-columns:1fr; }
+  .foot-top{ grid-template-columns:1fr 1fr; gap:30px; }
+  .foot-brand{ grid-column:span 2; }
+  .foot-bottom{ flex-direction:column; align-items:flex-start; }
+  .p-info{ display:none; }
+  .p-center{ flex:1; justify-content:flex-start; }
+  .toast{ left:16px; right:16px; top:80px; }
+}
+@media(max-width:480px){
+  .hosts-grid{ grid-template-columns:1fr; }
+  .social-grid{ grid-template-columns:repeat(2,1fr); }
+}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Saltar al contenido</a>
+
+<!-- =============================================================
+     HEADER
+     ============================================================= -->
+<header class="site-header">
+  <div class="hdr-inner">
+    <a href="#inicio" class="logo">
+      <span class="logo-mark"><span></span></span>
+      <span>
+        <span class="logo-word">Vívela</span>
+        <span class="logo-freq">STREAMING ONLINE · SANTIAGO</span>
+      </span>
+    </a>
+
+    <nav class="main-nav" id="main-nav">
+      <a href="#inicio" class="nav-a active">Inicio</a>
+      <a href="#top-semana" class="nav-a">Tendencias</a>
+      <a href="#programacion" class="nav-a">Programación</a>
+      <a href="#locutores" class="nav-a">Locutores</a>
+      <a href="#noticias" class="nav-a">Noticias</a>
+      <a href="#redes" class="nav-a">Redes</a>
+      <a href="#comunidad" class="nav-a">Comunidad</a>
+      <a href="#contacto" class="nav-a">Contacto</a>
+    </nav>
+
+    <div class="hdr-actions">
+      <span class="hdr-live"><span class="dot"></span>Al aire</span>
+      <button class="icon-btn" id="theme-toggle" aria-label="Cambiar tema oscuro/claro">
+        <svg id="icon-moon" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        <svg id="icon-sun" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+      <button class="icon-btn menu-btn" id="mobile-menu-btn" aria-label="Abrir menú móvil" aria-expanded="false">
+        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- =============================================================
+     HERO
+     ============================================================= -->
+<section class="hero" id="inicio">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="hero-eyebrow"><span class="badge-pill">NUEVO</span> Ahora con transmisión 24/7 en vivo</span>
+      <h1 class="hero-title">Vive la<br><em>música</em> de Chile</h1>
+      <p class="hero-slogan">Música latina, noticias al instante y la mejor compañía para tu día. Radio Vívela, el streaming que suena distinto.</p>
+      <div class="hero-cta">
+        <button class="btn-primary" id="hero-play-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.14v13.72L19 12 8 5.14z"/></svg>
+          Escuchar en vivo
+        </button>
+        <a href="#programacion" class="btn-ghost">Ver programación</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><b>HD</b><span>Audio streaming</span></div>
+        <div class="hero-stat"><b>24/7</b><span>Al aire siempre</span></div>
+        <div class="hero-stat"><b>+120k</b><span>Oyentes al mes</span></div>
+        <div class="hero-stat"><b>16</b><span>Regiones de Chile</span></div>
+      </div>
+    </div>
+
+    <div class="stream-visual-wrap">
+      <div class="stream-visual">
+        <div class="spectrum-bars" aria-hidden="true">
+          <span style="animation-delay:.0s"></span><span style="animation-delay:.08s"></span>
+          <span style="animation-delay:.16s"></span><span style="animation-delay:.05s"></span>
+          <span style="animation-delay:.22s"></span><span style="animation-delay:.1s"></span>
+          <span style="animation-delay:.3s"></span><span style="animation-delay:.02s"></span>
+          <span style="animation-delay:.18s"></span><span style="animation-delay:.12s"></span>
+          <span style="animation-delay:.25s"></span><span style="animation-delay:.06s"></span>
+          <span style="animation-delay:.2s"></span><span style="animation-delay:.14s"></span>
+          <span style="animation-delay:.28s"></span><span style="animation-delay:.04s"></span>
+        </div>
+        <div class="stream-badge">
+          <span class="live-chip"><span class="dot"></span>EN VIVO</span>
+          <b>Vívela</b>
+          <span class="stream-sub">Streaming online 24/7</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="onair-strip reveal">
+      <div class="onair-eq"><i></i><i></i><i></i><i></i></div>
+      <div class="onair-txt">
+        <b>Al aire ahora: <span id="onair-show">Cargando…</span></b>
+        <span id="onair-host">—</span>
+      </div>
+      <span class="listener-pill" aria-live="polite">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span id="listener-count">—</span> escuchando ahora
+      </span>
+      <button class="btn-ghost" id="notif-btn" type="button">🔔 Avisarme de programas en vivo</button>
+      <a href="#programacion" class="btn-ghost">Ver toda la parrilla</a>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<!-- =============================================================
+     LO MÁS ESCUCHADO + DESTACADO DEL DÍA
+     (reemplaza la idea de reloj de sintonización / dial FM)
+     ============================================================= -->
+<section class="section" id="top-semana">
+  <div class="wrap">
+    <div class="sect-head reveal">
+      <div>
+        <span class="eyebrow">Tendencias en Vívela</span>
+        <h2 class="sect-title">Lo más escuchado de la semana</h2>
+        <p class="sect-sub">El ranking se actualiza según reproducciones y pedidos de nuestros oyentes en streaming.</p>
+      </div>
+    </div>
+
+    <div class="trending-grid">
+      <ol class="trending-list reveal">
+        <li class="trending-item">
+          <span class="trending-rank">01</span>
+          <div class="trending-info"><h3>Vívela Hits</h3><p>Selección musical continua · Programa</p></div>
+          <div class="trending-bar"><span style="width:96%"></span></div>
+          <span class="trending-plays">12.4k</span>
+        </li>
+        <li class="trending-item">
+          <span class="trending-rank">02</span>
+          <div class="trending-info"><h3>Mañana Interactiva</h3><p>Con Claudio Valdivia · Programa</p></div>
+          <div class="trending-bar"><span style="width:84%"></span></div>
+          <span class="trending-plays">9.8k</span>
+        </li>
+        <li class="trending-item">
+          <span class="trending-rank">03</span>
+          <div class="trending-info"><h3>Vívela Nocturno</h3><p>Con Fernanda Soto · Programa</p></div>
+          <div class="trending-bar"><span style="width:71%"></span></div>
+          <span class="trending-plays">7.1k</span>
+        </li>
+        <li class="trending-item">
+          <span class="trending-rank">04</span>
+          <div class="trending-info"><h3>Pasión Deportiva</h3><p>Con Matías Fuentes · Programa</p></div>
+          <div class="trending-bar"><span style="width:58%"></span></div>
+          <span class="trending-plays">5.6k</span>
+        </li>
+        <li class="trending-item">
+          <span class="trending-rank">05</span>
+          <div class="trending-info"><h3>Vívela Retro</h3><p>Selección musical continua · Programa</p></div>
+          <div class="trending-bar"><span style="width:44%"></span></div>
+          <span class="trending-plays">4.2k</span>
+        </li>
+      </ol>
+
+      <div class="spotlight-card reveal reveal-delay-2">
+        <span class="eyebrow">Destacado de hoy</span>
+        <div class="spotlight-host">
+          <img src="https://i.pravatar.cc/160?img=12" alt="Claudio Valdivia">
+          <div>
+            <h3>Claudio Valdivia</h3>
+            <span>Mañana Interactiva</span>
+          </div>
+        </div>
+        <p class="spotlight-quote">"Hoy conversamos con oyentes en vivo sobre lo que se viene este fin de semana en Santiago. Escríbenos y sal al aire."</p>
+        <button class="btn-primary spotlight-btn" id="spotlight-play-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.14v13.72L19 12 8 5.14z"/></svg>
+          Escuchar ahora
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<!-- =============================================================
+     PROGRAMACIÓN
+     ============================================================= -->
+<section class="section" id="programacion">
+  <div class="wrap">
+    <div class="sect-head reveal">
+      <div>
+        <span class="eyebrow">Parrilla programática</span>
+        <h2 class="sect-title">Nuestra programación</h2>
+        <p class="sect-sub">Un show para cada momento del día. Elige un día y descubre quién te acompaña.</p>
+      </div>
+    </div>
+
+    <div class="day-tabs reveal" id="day-tabs"></div>
+    <div class="sched-grid" id="sched-grid"></div>
+  </div>
+</section>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<!-- =============================================================
+     LOCUTORES
+     ============================================================= -->
+<section class="section" id="locutores">
+  <div class="wrap">
+    <div class="sect-head reveal">
+      <div>
+        <span class="eyebrow">El equipo</span>
+        <h2 class="sect-title">Locutores al aire</h2>
+        <p class="sect-sub">Las voces que le dan vida a Vívela, todos los días de la semana.</p>
+      </div>
+    </div>
+
+    <div class="hosts-grid">
+      <article class="host-card reveal">
+        <div class="host-photo">
+          <img src="https://i.pravatar.cc/400?img=12" alt="Claudio Valdivia, locutor de Mañana Interactiva">
+          <span class="host-show">Mañana Interactiva</span>
+        </div>
+        <div class="host-body">
+          <h3>Claudio Valdivia</h3>
+          <p>Despierta a Chile con música, humor y las noticias más comentadas del día.</p>
+          <div class="host-social">
+            <a href="#" aria-label="Instagram de Claudio"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07s-3.58-.01-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92-.06-1.27-.07-1.65-.07-4.85s.02-3.58.07-4.85C2.38 3.9 3.9 2.38 7.15 2.23 8.42 2.17 8.8 2.16 12 2.16zM12 0C8.74 0 8.33.01 7.05.07 2.7.27.27 2.7.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.2 4.35 2.62 6.78 6.98 6.98C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c4.35-.2 6.78-2.62 6.98-6.98.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95C23.73 2.7 21.3.27 16.95.07 15.67.01 15.26 0 12 0z"/><path d="M12 5.84A6.16 6.16 0 1 0 18.16 12 6.16 6.16 0 0 0 12 5.84zm0 10.16A4 4 0 1 1 16 12a4 4 0 0 1-4 4zM18.4 4.6a1.44 1.44 0 1 0 1.44 1.44A1.44 1.44 0 0 0 18.4 4.6z"/></svg></a>
+            <a href="#" aria-label="WhatsApp de Claudio"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.87.5 3.62 1.44 5.13L2 22l5.13-1.55a9.9 9.9 0 0 0 4.91 1.28c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zm0 18.1a8.16 8.16 0 0 1-4.16-1.14l-.3-.18-3.05.92.94-2.98-.2-.3a8.14 8.14 0 0 1-1.25-4.5c0-4.5 3.66-8.15 8.16-8.15s8.16 3.65 8.16 8.15-3.66 8.18-8.3 8.18z"/></svg></a>
+          </div>
+        </div>
+      </article>
+
+      <article class="host-card reveal">
+        <div class="host-photo">
+          <img src="https://i.pravatar.cc/400?img=47" alt="Camila Rojas, locutora de Vívela Central">
+          <span class="host-show">Vívela Central</span>
+        </div>
+        <div class="host-body">
+          <h3>Camila Rojas</h3>
+          <p>Actualidad, entrevistas y el resumen noticioso más completo cada mediodía.</p>
+          <div class="host-social">
+            <a href="#" aria-label="Instagram de Camila"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07s-3.58-.01-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92-.06-1.27-.07-1.65-.07-4.85s.02-3.58.07-4.85C2.38 3.9 3.9 2.38 7.15 2.23 8.42 2.17 8.8 2.16 12 2.16zM12 0C8.74 0 8.33.01 7.05.07 2.7.27.27 2.7.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.2 4.35 2.62 6.78 6.98 6.98C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c4.35-.2 6.78-2.62 6.98-6.98.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95C23.73 2.7 21.3.27 16.95.07 15.67.01 15.26 0 12 0z"/></svg></a>
+            <a href="#" aria-label="WhatsApp de Camila"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.87.5 3.62 1.44 5.13L2 22l5.13-1.55a9.9 9.9 0 0 0 4.91 1.28c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zm0 18.1a8.16 8.16 0 0 1-4.16-1.14l-.3-.18-3.05.92.94-2.98-.2-.3a8.14 8.14 0 0 1-1.25-4.5c0-4.5 3.66-8.15 8.16-8.15s8.16 3.65 8.16 8.15-3.66 8.18-8.3 8.18z"/></svg></a>
+          </div>
+        </div>
+      </article>
+
+      <article class="host-card reveal">
+        <div class="host-photo">
+          <img src="https://i.pravatar.cc/400?img=33" alt="Matías Fuentes, locutor de Pasión Deportiva">
+          <span class="host-show">Pasión Deportiva</span>
+        </div>
+        <div class="host-body">
+          <h3>Matías Fuentes</h3>
+          <p>Fútbol chileno, análisis y la previa de cada fecha con invitados especiales.</p>
+          <div class="host-social">
+            <a href="#" aria-label="Instagram de Matías"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07s-3.58-.01-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92-.06-1.27-.07-1.65-.07-4.85s.02-3.58.07-4.85C2.38 3.9 3.9 2.38 7.15 2.23 8.42 2.17 8.8 2.16 12 2.16zM12 0C8.74 0 8.33.01 7.05.07 2.7.27.27 2.7.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.2 4.35 2.62 6.78 6.98 6.98C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c4.35-.2 6.78-2.62 6.98-6.98.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95C23.73 2.7 21.3.27 16.95.07 15.67.01 15.26 0 12 0z"/></svg></a>
+            <a href="#" aria-label="WhatsApp de Matías"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.87.5 3.62 1.44 5.13L2 22l5.13-1.55a9.9 9.9 0 0 0 4.91 1.28c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zm0 18.1a8.16 8.16 0 0 1-4.16-1.14l-.3-.18-3.05.92.94-2.98-.2-.3a8.14 8.14 0 0 1-1.25-4.5c0-4.5 3.66-8.15 8.16-8.15s8.16 3.65 8.16 8.15-3.66 8.18-8.3 8.18z"/></svg></a>
+          </div>
+        </div>
+      </article>
+
+      <article class="host-card reveal">
+        <div class="host-photo">
+          <img src="https://i.pravatar.cc/400?img=56" alt="Fernanda Soto, locutora de Vívela Nocturno">
+          <span class="host-show">Vívela Nocturno</span>
+        </div>
+        <div class="host-body">
+          <h3>Fernanda Soto</h3>
+          <p>Baladas, historias de la audiencia y la mejor compañía para cerrar el día.</p>
+          <div class="host-social">
+            <a href="#" aria-label="Instagram de Fernanda"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07s-3.58-.01-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92-.06-1.27-.07-1.65-.07-4.85s.02-3.58.07-4.85C2.38 3.9 3.9 2.38 7.15 2.23 8.42 2.17 8.8 2.16 12 2.16zM12 0C8.74 0 8.33.01 7.05.07 2.7.27.27 2.7.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.2 4.35 2.62 6.78 6.98 6.98C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c4.35-.2 6.78-2.62 6.98-6.98.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95C23.73 2.7 21.3.27 16.95.07 15.67.01 15.26 0 12 0z"/></svg></a>
+            <a href="#" aria-label="WhatsApp de Fernanda"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.87.5 3.62 1.44 5.13L2 22l5.13-1.55a9.9 9.9 0 0 0 4.91 1.28c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zm0 18.1a8.16 8.16 0 0 1-4.16-1.14l-.3-.18-3.05.92.94-2.98-.2-.3a8.14 8.14 0 0 1-1.25-4.5c0-4.5 3.66-8.15 8.16-8.15s8.16 3.65 8.16 8.15-3.66 8.18-8.3 8.18z"/></svg></a>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<!-- =============================================================
+     NOTICIAS
+     ============================================================= -->
+<section class="section" id="noticias">
+  <div class="wrap">
+    <div class="sect-head reveal">
+      <div>
+        <span class="eyebrow">Al instante</span>
+        <h2 class="sect-title">Noticias y novedades</h2>
+        <p class="sect-sub">Lo último de Chile y el mundo, resumido por el equipo de prensa de Vívela.</p>
+      </div>
+      <a href="/noticias" class="btn-ghost">Ver todas</a>
+    </div>
+
+    <div class="news-grid">
+      {% if posts %}
+        {% for post in posts %}
+        <article class="news-card {{ 'feat' if loop.first else '' }} reveal">
+          <a href="/noticias/{{ post.slug }}" style="display:contents;">
+            <div class="news-img-wrap">
+              {% if post.featured_image %}
+                <img src="/static/uploads/{{ post.featured_image }}" alt="{{ post.title }}">
+              {% else %}
+                <img src="https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=1000&auto=format&fit=crop" alt="{{ post.title }}">
+              {% endif %}
+              <span class="news-tag">Vívela</span>
+            </div>
+            <div class="news-body">
+              <h3>{{ post.title }}</h3>
+              <p>{{ post.excerpt }}</p>
+              <time class="news-date">{{ post.published_at[:10] if post.published_at else '' }}</time>
+            </div>
+          </a>
+        </article>
+        {% endfor %}
+      {% else %}
+        <p style="color:var(--text-dim);">Todavía no hay noticias publicadas. El equipo de prensa está preparando las primeras novedades — vuelve pronto.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<!-- =============================================================
+     REDES SOCIALES
+     ============================================================= -->
+<section class="section-tight" id="redes">
+  <div class="wrap">
+    <div class="sect-head reveal">
+      <div>
+        <span class="eyebrow">Síguenos</span>
+        <h2 class="sect-title">Vívela en tus redes</h2>
+        <p class="sect-sub">Contenido exclusivo, en vivo y detrás de cámaras todos los días.</p>
+      </div>
+    </div>
+    <div class="social-grid">
+      <a href="#" class="social-card reveal">
+        <span class="social-ic ic-fb"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z"/></svg></span>
+        <h4>Facebook</h4><span>85k seguidores</span>
+      </a>
+      <a href="#" class="social-card reveal">
+        <span class="social-ic ic-ig"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07s-3.58-.01-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92-.06-1.27-.07-1.65-.07-4.85s.02-3.58.07-4.85C2.38 3.9 3.9 2.38 7.15 2.23 8.42 2.17 8.8 2.16 12 2.16zM12 0C8.74 0 8.33.01 7.05.07 2.7.27.27 2.7.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.2 4.35 2.62 6.78 6.98 6.98C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c4.35-.2 6.78-2.62 6.98-6.98.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95C23.73 2.7 21.3.27 16.95.07 15.67.01 15.26 0 12 0z"/><path d="M12 5.84A6.16 6.16 0 1 0 18.16 12 6.16 6.16 0 0 0 12 5.84zm0 10.16A4 4 0 1 1 16 12a4 4 0 0 1-4 4zM18.4 4.6a1.44 1.44 0 1 0 1.44 1.44A1.44 1.44 0 0 0 18.4 4.6z"/></svg></span>
+        <h4>Instagram</h4><span>132k seguidores</span>
+      </a>
+      <a href="#" class="social-card reveal">
+        <span class="social-ic ic-tt"><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M16.6 5.82s.51.5 0 0A4.28 4.28 0 0 1 15.54 3h-3.09v12.4a2.59 2.59 0 1 1-2.59-2.59c.24 0 .48.03.71.1v-3.13a5.74 5.74 0 1 0 4.97 5.7V9.11a7.35 7.35 0 0 0 4.06 1.23V7.3s-1.68.08-2.99-1.48z"/></svg></span>
+        <h4>TikTok</h4><span>64k seguidores</span>
+      </a>
+      <a href="#" class="social-card reveal">
+        <span class="social-ic ic-yt"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.55A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14C4.5 20.5 12 20.5 12 20.5s7.5 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81zM9.6 15.6V8.4L15.8 12z"/></svg></span>
+        <h4>YouTube</h4><span>48k suscriptores</span>
+      </a>
+      <a href="#" class="social-card reveal">
+        <span class="social-ic ic-wa"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.87.5 3.62 1.44 5.13L2 22l5.13-1.55a9.9 9.9 0 0 0 4.91 1.28c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zm0 18.1a8.16 8.16 0 0 1-4.16-1.14l-.3-.18-3.05.92.94-2.98-.2-.3a8.14 8.14 0 0 1-1.25-4.5c0-4.5 3.66-8.15 8.16-8.15s8.16 3.65 8.16 8.15-3.66 8.18-8.3 8.18zm4.47-6.12c-.24-.12-1.44-.71-1.67-.79-.22-.08-.39-.12-.55.12-.16.24-.63.79-.78.95-.14.16-.29.18-.53.06-.24-.12-1.02-.38-1.94-1.2-.72-.64-1.2-1.43-1.35-1.67-.14-.24-.02-.37.11-.49.11-.11.24-.29.36-.43.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.55-1.33-.76-1.82-.2-.48-.4-.42-.55-.42-.14 0-.3-.02-.46-.02-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.7 2.6 4.13 3.64.58.25 1.03.4 1.38.51.58.18 1.11.16 1.53.1.47-.07 1.44-.59 1.64-1.16.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.46-.28z"/></svg></span>
+        <h4>WhatsApp</h4><span>Escríbenos ya</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<!-- =============================================================
+     COMUNIDAD
+     ============================================================= -->
+<section class="section-tight" id="comunidad">
+  <div class="wrap">
+    <div class="sect-head reveal">
+      <div>
+        <span class="eyebrow">Más que una radio</span>
+        <h2 class="sect-title">Súmate a la comunidad Vívela</h2>
+        <p class="sect-sub">Saludos al aire, pedidos de canciones y la mejor conversación con otros oyentes, todos los días.</p>
+      </div>
+      <a href="https://wa.me/56900000000?text=Hola%2C%20quiero%20sumarme%20a%20la%20comunidad%20de%20Radio%20V%C3%ADvela" target="_blank" rel="noopener" class="btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.87.5 3.62 1.44 5.13L2 22l5.13-1.55a9.9 9.9 0 0 0 4.91 1.28c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2z"/></svg>
+        Únete por WhatsApp
+      </a>
+    </div>
+
+    <div class="community-grid">
+      <blockquote class="community-card reveal">
+        <p>"Escucho Vívela todas las mañanas manejando al trabajo, la mejor selección musical de Santiago."</p>
+        <footer><span class="community-avatar">MJ</span><div><cite>Marcela J.</cite><span>Oyente desde 2021</span></div></footer>
+      </blockquote>
+      <blockquote class="community-card reveal reveal-delay-1">
+        <p>"Pedí una canción por WhatsApp y la sonaron en menos de 10 minutos. Se siente una radio cercana de verdad."</p>
+        <footer><span class="community-avatar">DP</span><div><cite>Diego P.</cite><span>Comunidad Vívela</span></div></footer>
+      </blockquote>
+      <blockquote class="community-card reveal reveal-delay-2">
+        <p>"El chat de oyentes en vivo durante Vívela Nocturno es una locura, siempre hay alguien con quien conversar."</p>
+        <footer><span class="community-avatar">CS</span><div><cite>Camila S.</cite><span>Oyente frecuente</span></div></footer>
+      </blockquote>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<!-- =============================================================
+     CONTACTO
+     ============================================================= -->
+<section class="section" id="contacto">
+  <div class="wrap">
+    <div class="sect-head reveal">
+      <div>
+        <span class="eyebrow">Hablemos</span>
+        <h2 class="sect-title">Contáctanos</h2>
+        <p class="sect-sub">¿Publicidad, saludos al aire o consultas comerciales? Escríbenos, te respondemos a la brevedad.</p>
+      </div>
+    </div>
+
+    <div class="contact-grid">
+      <div class="contact-info reveal">
+        <h3>Estudios Radio Vívela</h3>
+        <p>Nuestro equipo comercial y de prensa está disponible en horario hábil para recibir tus consultas, propuestas de auspicio y saludos al aire.</p>
+
+        <div class="contact-line">
+          <span class="ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 12-9 12S3 17 3 10a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg></span>
+          <div><b>Dirección</b><span>Av. Providencia 1234, Of. 502, Santiago, Chile</span></div>
+        </div>
+        <div class="contact-line">
+          <span class="ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.68 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.32 1.85.55 2.81.68A2 2 0 0 1 22 16.92z"/></svg></span>
+          <div><b>Teléfono</b><span>+56 2 2345 6789</span></div>
+        </div>
+        <div class="contact-line">
+          <span class="ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z" opacity="0"/><path d="M22 6 12 13 2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg></span>
+          <div><b>Correo</b><span>contacto@radiovivela.cl</span></div>
+        </div>
+        <div class="contact-line">
+          <span class="ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6v6l4 2"/><circle cx="12" cy="12" r="10"/></svg></span>
+          <div><b>Horario de atención</b><span>Lunes a viernes, 9:00–18:30 hrs</span></div>
+        </div>
+
+        <div class="brand-panel">
+          <span class="eyebrow">Para marcas y auspiciadores</span>
+          <p>Llega a más de 120 mil oyentes al mes en 16 regiones de Chile con menciones al aire, pauta digital y activaciones en nuestras redes.</p>
+          <div class="brand-stats">
+            <div><b>+120k</b><span>Oyentes/mes</span></div>
+            <div><b>16</b><span>Regiones</span></div>
+            <div><b>24/7</b><span>Al aire</span></div>
+          </div>
+        </div>
+      </div>
+
+      <form class="contact-form" id="contact-form" novalidate>
+        <div class="form-row">
+          <div class="field">
+            <label for="cf-name">Nombre completo</label>
+            <input type="text" id="cf-name" name="name" placeholder="Tu nombre" required minlength="2">
+            <span class="err" id="err-name"></span>
+          </div>
+          <div class="field">
+            <label for="cf-email">Correo electrónico</label>
+            <input type="email" id="cf-email" name="email" placeholder="tucorreo@ejemplo.cl" required>
+            <span class="err" id="err-email"></span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="cf-subject">Motivo de contacto</label>
+          <select id="cf-subject" name="subject" required>
+            <option value="">Selecciona una opción</option>
+            <option value="publicidad">Publicidad y auspicios</option>
+            <option value="saludo">Saludo al aire</option>
+            <option value="prensa">Contacto de prensa</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="cf-msg">Mensaje</label>
+          <textarea id="cf-msg" name="message" rows="5" placeholder="Cuéntanos en qué te podemos ayudar…" required minlength="10"></textarea>
+          <span class="err" id="err-msg"></span>
+        </div>
+        <button type="submit" class="btn-primary form-submit">Enviar mensaje</button>
+        <p class="form-note" id="form-note"></p>
+      </form>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- =============================================================
+     FOOTER
+     ============================================================= -->
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot-top">
+      <div class="foot-brand">
+        <a href="#inicio" class="logo">
+          <span class="logo-mark"><span></span></span>
+          <span><span class="logo-word">Vívela</span><span class="logo-freq">STREAMING ONLINE · SANTIAGO</span></span>
+        </a>
+        <p>La radio que suena distinto: música latina, noticias y deportes las 24 horas, todos los días del año.</p>
+        <div class="foot-social">
+          <a href="#" aria-label="Facebook"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z"/></svg></a>
+          <a href="#" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 3.25.15 4.77 1.69 4.92 4.92.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.15 3.23-1.66 4.77-4.92 4.92-1.27.06-1.64.07-4.85.07s-3.58-.01-4.85-.07c-3.26-.15-4.77-1.7-4.92-4.92-.06-1.27-.07-1.65-.07-4.85s.02-3.58.07-4.85C2.38 3.9 3.9 2.38 7.15 2.23 8.42 2.17 8.8 2.16 12 2.16zM12 0C8.74 0 8.33.01 7.05.07 2.7.27.27 2.7.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.2 4.35 2.62 6.78 6.98 6.98C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c4.35-.2 6.78-2.62 6.98-6.98.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95C23.73 2.7 21.3.27 16.95.07 15.67.01 15.26 0 12 0z"/></svg></a>
+          <a href="#" aria-label="YouTube"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.55A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14C4.5 20.5 12 20.5 12 20.5s7.5 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81zM9.6 15.6V8.4L15.8 12z"/></svg></a>
+          <a href="#" aria-label="WhatsApp"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.87.5 3.62 1.44 5.13L2 22l5.13-1.55a9.9 9.9 0 0 0 4.91 1.28c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2z"/></svg></a>
+        </div>
+      </div>
+      <div class="foot-col">
+        <h5>Navegación</h5>
+        <a href="#top-semana">Tendencias</a>
+        <a href="#programacion">Programación</a>
+        <a href="#locutores">Locutores</a>
+        <a href="#noticias">Noticias</a>
+        <a href="#comunidad">Comunidad</a>
+        <a href="#contacto">Contacto</a>
+      </div>
+      <div class="foot-col">
+        <h5>Radio</h5>
+        <a href="#">Sobre nosotros</a>
+        <a href="#">Trabaja con nosotros</a>
+        <a href="#">Auspicios</a>
+        <a href="#">Prensa</a>
+      </div>
+      <div class="foot-col">
+        <h5>Legal</h5>
+        <a href="#">Términos y condiciones</a>
+        <a href="#">Política de privacidad</a>
+        <a href="#">Política de cookies</a>
+      </div>
+    </div>
+
+    <div class="foot-bottom">
+      <p class="foot-legal">© 2026 Radio Vívela SpA. Todos los derechos reservados. Radio 100% online, transmitiendo vía streaming las 24 horas, los 7 días de la semana. RUT 76.XXX.XXX-X. · <a href="/admin/login" style="color:var(--text-dim); text-decoration:underline; opacity:.7;">Panel del equipo</a></p>
+      <button class="to-top" id="to-top" aria-label="Volver arriba">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5M5 12l7-7 7 7"/></svg>
+      </button>
+    </div>
+  </div>
+</footer>
+
+<!-- =============================================================
+     REPRODUCTOR EN VIVO — Barra fija inferior
+     ============================================================= -->
+<div class="radio-player">
+  <div class="p-info">
+    <div class="live-badge"><span class="live-dot"></span><span class="live-txt">Al aire</span></div>
+    <div class="equalizer" id="equalizer">
+      <div class="eq-bar paused"></div><div class="eq-bar paused"></div>
+      <div class="eq-bar paused"></div><div class="eq-bar paused"></div>
+    </div>
+    <div class="p-label">
+      <p class="p-name" id="player-show">Cargando programación…</p>
+      <p class="p-sub" id="player-host">Radio Vívela</p>
+    </div>
+  </div>
+
+  <div class="p-center">
+    <button class="play-btn" id="play-btn" aria-label="Reproducir radio en vivo">
+      <svg class="play-icon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.14v13.72L19 12 8 5.14z"/></svg>
+      <svg class="pause-icon" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+    </button>
+  </div>
+
+  <div class="p-right">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="rgba(255,255,255,.6)"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+    <input type="range" class="vol-slider" id="vol-slider" min="0" max="100" value="80" aria-label="Volumen">
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =============================================================
+   TEMA CLARO / OSCURO
+   ============================================================= */
+const html = document.documentElement;
+const themeToggle = document.getElementById('theme-toggle');
+const moonIco = document.getElementById('icon-moon');
+const sunIco  = document.getElementById('icon-sun');
+
+function applyTheme(t){
+  html.setAttribute('data-theme', t);
+  if(t === 'light'){ moonIco.style.display='none'; sunIco.style.display='block'; }
+  else{ moonIco.style.display='block'; sunIco.style.display='none'; }
+}
+applyTheme(localStorage.getItem('vivela-theme') || 'dark');
+themeToggle.addEventListener('click', () => {
+  const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  localStorage.setItem('vivela-theme', next);
+});
+
+/* =============================================================
+   MENÚ MÓVIL
+   ============================================================= */
+const mobileBtn = document.getElementById('mobile-menu-btn');
+const mainNav   = document.getElementById('main-nav');
+mobileBtn.addEventListener('click', () => {
+  const open = mainNav.classList.toggle('mobile-open');
+  mobileBtn.setAttribute('aria-expanded', open);
+});
+document.querySelectorAll('.nav-a').forEach(a => a.addEventListener('click', () => {
+  mainNav.classList.remove('mobile-open');
+  document.querySelectorAll('.nav-a').forEach(x => x.classList.remove('active'));
+  a.classList.add('active');
+}));
+
+/* =============================================================
+   PROGRAMACIÓN — Datos y render
+   ============================================================= */
+const schedule = {
+  'Lunes a Viernes': [
+    { start:6,  end:10, show:'Mañana Interactiva', host:'Con Claudio Valdivia' },
+    { start:10, end:13, show:'Vívela Central',      host:'Con Camila Rojas' },
+    { start:13, end:16, show:'Vívela Hits',         host:'Selección musical continua' },
+    { start:16, end:19, show:'Pasión Deportiva',    host:'Con Matías Fuentes' },
+    { start:19, end:23, show:'Vívela Nocturno',     host:'Con Fernanda Soto' },
+    { start:23, end:6,  show:'Vívela Sin Parar',    host:'Automatizado · Lo mejor de la música' },
+  ],
+  'Sábado': [
+    { start:8,  end:12, show:'Sábado en Familia',   host:'Con Camila Rojas' },
+    { start:12, end:16, show:'La Previa del Finde',  host:'Con Matías Fuentes' },
+    { start:16, end:22, show:'Vívela Fiesta',        host:'Selección musical continua' },
+    { start:22, end:8,  show:'Vívela Sin Parar',     host:'Automatizado · Lo mejor de la música' },
+  ],
+  'Domingo': [
+    { start:9,  end:13, show:'Domingo Familiar',     host:'Con Fernanda Soto' },
+    { start:13, end:18, show:'Vívela Retro',         host:'Selección musical continua' },
+    { start:18, end:9,  show:'Vívela Sin Parar',     host:'Automatizado · Lo mejor de la música' },
+  ],
+};
+const dayOrder = ['Lunes a Viernes','Sábado','Domingo'];
+
+function fmtHour(h){ return (h % 24).toString().padStart(2,'0') + ':00'; }
+
+function currentDayKey(){
+  const d = new Date().getDay(); // 0 Dom - 6 Sáb
+  if(d === 0) return 'Domingo';
+  if(d === 6) return 'Sábado';
+  return 'Lunes a Viernes';
+}
+function isNowInRange(item){
+  const h = new Date().getHours();
+  if(item.start < item.end) return h >= item.start && h < item.end;
+  return h >= item.start || h < item.end; // rango que cruza medianoche
+}
+
+const dayTabsEl = document.getElementById('day-tabs');
+const schedGridEl = document.getElementById('sched-grid');
+let activeDay = currentDayKey();
+
+function renderTabs(){
+  dayTabsEl.innerHTML = '';
+  dayOrder.forEach(day => {
+    const btn = document.createElement('button');
+    btn.className = 'day-tab' + (day === activeDay ? ' active' : '');
+    btn.textContent = day;
+    btn.addEventListener('click', () => { activeDay = day; renderTabs(); renderSchedule(); });
+    dayTabsEl.appendChild(btn);
+  });
+}
+
+function renderSchedule(){
+  schedGridEl.innerHTML = '';
+  const todaysReal = activeDay === currentDayKey();
+  schedule[activeDay].forEach(item => {
+    const isNow = todaysReal && isNowInRange(item);
+    const card = document.createElement('div');
+    card.className = 'sched-card' + (isNow ? ' now' : '');
+    card.innerHTML = `
+      <span class="sched-time">${fmtHour(item.start)} – ${fmtHour(item.end)}</span>
+      <div class="sched-info"><h3>${item.show}</h3><p>${item.host}</p></div>
+      ${isNow ? '<span class="sched-now-tag"><span class="dot"></span>Al aire</span>' : ''}
+    `;
+    schedGridEl.appendChild(card);
+  });
+}
+renderTabs();
+renderSchedule();
+
+/* Programa actual → strip "on air" y reproductor */
+function getCurrentShow(){
+  const list = schedule[currentDayKey()];
+  return list.find(isNowInRange) || list[0];
+}
+const current = getCurrentShow();
+document.getElementById('onair-show').textContent = current.show;
+document.getElementById('onair-host').textContent = current.host;
+document.getElementById('player-show').textContent = current.show;
+document.getElementById('player-host').textContent = current.host;
+
+/* =============================================================
+   OYENTES EN VIVO — Contador simulado (referencial)
+   ============================================================= */
+const listenerEl = document.getElementById('listener-count');
+let listenerBase = 480 + Math.floor(Math.random() * 260);
+function renderListeners(){ listenerEl.textContent = listenerBase.toLocaleString('es-CL'); }
+renderListeners();
+setInterval(() => {
+  listenerBase += Math.floor(Math.random() * 13) - 6;
+  if(listenerBase < 120) listenerBase = 120;
+  renderListeners();
+}, 4000);
+
+/* =============================================================
+   NOTIFICACIONES DE PROGRAMAS EN VIVO
+   ============================================================= */
+const notifBtn = document.getElementById('notif-btn');
+notifBtn.addEventListener('click', () => {
+  if(!('Notification' in window)){
+    showToast('Tu navegador no soporta notificaciones.');
+    return;
+  }
+  if(Notification.permission === 'granted'){
+    showToast('Ya recibirás avisos de nuestros programas en vivo.');
+    return;
+  }
+  Notification.requestPermission().then(perm => {
+    if(perm === 'granted'){
+      showToast('¡Listo! Te avisaremos cuando empiece un programa en vivo.');
+      new Notification('Vívela — Streaming Online', { body: 'Te avisaremos cuando empiece un programa en vivo 🎧' });
+    }else{
+      showToast('No activaste las notificaciones. Puedes intentarlo de nuevo cuando quieras.');
+    }
+  });
+});
+
+/* =============================================================
+   REPRODUCTOR DE RADIO
+   ============================================================= */
+const playBtn   = document.getElementById('play-btn');
+const heroPlay  = document.getElementById('hero-play-btn');
+const eqBars    = document.querySelectorAll('.eq-bar');
+const volSlider = document.getElementById('vol-slider');
+let isPlaying = false, audio = null;
+
+function togglePlay(){
+  isPlaying = !isPlaying;
+  if(isPlaying){
+    playBtn.classList.add('playing','loading');
+    eqBars.forEach(b => b.classList.remove('paused'));
+    if(!audio){
+      audio = new Audio('https://zeus.miradio.pro/listen/vivela/stream');
+      audio.volume = volSlider.value / 100;
+    }
+    audio.play().then(() => {
+      playBtn.classList.remove('loading');
+    }).catch(err => {
+      console.warn('No se pudo reproducir el stream:', err);
+      isPlaying = false;
+      playBtn.classList.remove('playing','loading');
+      eqBars.forEach(b => b.classList.add('paused'));
+      showToast('El streaming no está disponible en este momento. Intenta más tarde.');
+    });
+  }else{
+    playBtn.classList.remove('playing');
+    eqBars.forEach(b => b.classList.add('paused'));
+    if(audio) audio.pause();
+  }
+}
+playBtn.addEventListener('click', togglePlay);
+heroPlay.addEventListener('click', () => { if(!isPlaying) togglePlay(); window.scrollTo({top:0, behavior:'smooth'}); });
+const spotlightPlay = document.getElementById('spotlight-play-btn');
+if(spotlightPlay) spotlightPlay.addEventListener('click', () => { if(!isPlaying) togglePlay(); });
+volSlider.addEventListener('input', e => { if(audio) audio.volume = e.target.value / 100; });
+
+/* =============================================================
+   FORMULARIO DE CONTACTO
+   ============================================================= */
+const form = document.getElementById('contact-form');
+const noteEl = document.getElementById('form-note');
+form.addEventListener('submit', e => {
+  e.preventDefault();
+  let valid = true;
+  const name = document.getElementById('cf-name');
+  const email = document.getElementById('cf-email');
+  const msg = document.getElementById('cf-msg');
+  const errName = document.getElementById('err-name');
+  const errEmail = document.getElementById('err-email');
+  const errMsg = document.getElementById('err-msg');
+  errName.textContent = ''; errEmail.textContent = ''; errMsg.textContent = '';
+
+  if(name.value.trim().length < 2){ errName.textContent = 'Ingresa tu nombre completo.'; valid = false; }
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim());
+  if(!emailOk){ errEmail.textContent = 'Ingresa un correo válido.'; valid = false; }
+  if(msg.value.trim().length < 10){ errMsg.textContent = 'Cuéntanos un poco más (mín. 10 caracteres).'; valid = false; }
+
+  if(!valid) return;
+
+  noteEl.textContent = '¡Gracias! Tu mensaje fue enviado, te responderemos pronto.';
+  noteEl.classList.add('ok');
+  form.reset();
+  setTimeout(() => { noteEl.textContent = ''; noteEl.classList.remove('ok'); }, 6000);
+});
+
+function showToast(text){
+  const toast = document.getElementById('toast');
+  toast.textContent = text;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 4000);
+}
+
+/* =============================================================
+   VOLVER ARRIBA
+   ============================================================= */
+document.getElementById('to-top').addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
+
+/* =============================================================
+   ANIMACIÓN DE ENTRADA AL HACER SCROLL
+   ============================================================= */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(entry => { if(entry.isIntersecting){ entry.target.classList.add('in'); io.unobserve(entry.target); } });
+}, { threshold: .12 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>

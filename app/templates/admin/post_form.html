@@ -1,0 +1,97 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ 'Editar noticia' if post else 'Nueva noticia' }}{% endblock %}
+{% block heading %}{{ 'Editar noticia' if post else 'Nueva noticia' }}{% endblock %}
+
+{% block extra_head %}
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+
+{% if saved %}<div class="login-success" style="max-width:820px;">Cambios guardados correctamente.</div>{% endif %}
+{% if error %}<div class="login-error" style="max-width:820px;">{{ error }}</div>{% endif %}
+
+<form class="form-card" method="post"
+      action="{{ '/admin/posts/' ~ post.id ~ '/edit' if post else '/admin/posts/new' }}"
+      enctype="multipart/form-data" id="postForm">
+
+  <div class="form-grid">
+    <div>
+      <div class="field">
+        <label for="title">Título</label>
+        <input type="text" id="title" name="title" required value="{{ post.title if post else '' }}" placeholder="Ej: Vívela anuncia nueva parrilla de verano">
+      </div>
+
+      <div class="field">
+        <label for="excerpt">Resumen corto (opcional)</label>
+        <textarea id="excerpt" name="excerpt" rows="2" placeholder="Si lo dejas vacío, se genera automáticamente a partir del contenido.">{{ post.excerpt if post else '' }}</textarea>
+        <span class="field-hint">Aparece en las tarjetas de la lista de noticias.</span>
+      </div>
+
+      <div class="field">
+        <label>Contenido</label>
+        <div id="editor">{{ (post.content_html | safe) if post else '' }}</div>
+        <textarea name="content_html" id="content_html" style="display:none;"></textarea>
+      </div>
+    </div>
+
+    <div>
+      <div class="field">
+        <label>Estado</label>
+        <div class="status-toggle">
+          <label>
+            <input type="radio" name="status" value="borrador" {{ 'checked' if (not post) or post.status == 'borrador' else '' }}>
+            <span>📝 Borrador</span>
+          </label>
+          <label>
+            <input type="radio" name="status" value="publicado" {{ 'checked' if post and post.status == 'publicado' else '' }}>
+            <span>🚀 Publicado</span>
+          </label>
+        </div>
+        <span class="field-hint">Los borradores no se muestran en el sitio público.</span>
+      </div>
+
+      <div class="field">
+        <label for="featured_image">Imagen destacada</label>
+        <input type="file" id="featured_image" name="featured_image" accept=".jpg,.jpeg,.png,.webp,.gif">
+        <span class="field-hint">JPG, PNG, WEBP o GIF · máx. 6 MB.</span>
+      </div>
+
+      {% if post and post.featured_image %}
+      <div class="current-image">
+        <img src="/static/uploads/{{ post.featured_image }}" alt="Imagen actual">
+      </div>
+      <label style="display:flex; align-items:center; gap:8px; margin-top:10px; font-size:.8rem; color:var(--text-dim);">
+        <input type="checkbox" name="remove_image" value="1"> Quitar imagen actual
+      </label>
+      {% endif %}
+    </div>
+  </div>
+
+  <div style="display:flex; gap:12px; margin-top:28px;">
+    <button type="submit" class="btn btn-primary">💾 Guardar noticia</button>
+    <a href="/admin" class="btn">Cancelar</a>
+  </div>
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+<script>
+  const quill = new Quill('#editor', {
+    theme: 'snow',
+    placeholder: 'Escribe la noticia aquí…',
+    modules: {
+      toolbar: [
+        [{ header: [2, 3, false] }],
+        ['bold', 'italic', 'underline'],
+        ['link', 'image', 'blockquote'],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        ['clean']
+      ]
+    }
+  });
+
+  document.getElementById('postForm').addEventListener('submit', () => {
+    document.getElementById('content_html').value = quill.root.innerHTML;
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Panel{% endblock %} · Admin Vívela</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+{% block extra_head %}{% endblock %}
+</head>
+<body>
+<div class="admin-shell">
+  <aside class="admin-sidebar">
+    <div class="brand"><span class="brand-mark"></span>Vívela <span style="color:var(--text-dim);font-weight:500;font-size:.8rem;">admin</span></div>
+    <nav class="admin-nav">
+      <a href="/admin" class="{{ 'active' if request.url.path == '/admin' else '' }}">📋 Noticias</a>
+      <a href="/admin/posts/new" class="{{ 'active' if '/posts/new' in request.url.path else '' }}">➕ Nueva noticia</a>
+      <a href="/noticias" target="_blank">🌐 Ver sitio público</a>
+    </nav>
+  </aside>
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <h1>{% block heading %}Panel{% endblock %}</h1>
+      {% if user %}
+      <div class="admin-user">
+        Hola, <strong>{{ user.username }}</strong>
+        <form method="post" action="/admin/logout" style="margin:0;">
+          <button type="submit" class="btn btn-sm">Cerrar sesión</button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+    {% block content %}{% endblock %}
+  </main>
+</div>
+</body>
+</html>
