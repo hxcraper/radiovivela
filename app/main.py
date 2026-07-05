@@ -23,6 +23,8 @@ from starlette.middleware.sessions import SessionMiddleware
 from app import database as db
 from app import auth
 from app.utils import slugify, make_excerpt, ALLOWED_IMAGE_EXTENSIONS, MAX_IMAGE_BYTES
+from pydantic import BaseModel
+
 app = FastAPI()
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -38,6 +40,7 @@ app = FastAPI(title="Blog Radio — Panel de noticias")
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY, session_cookie="blogradio_session")
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
+
 
 
 @app.on_event("startup")
@@ -328,6 +331,7 @@ def admin_post_delete(request: Request, post_id: int):
     db.delete_post(post_id)
     return RedirectResponse("/admin", status_code=303)
 
+""""
 
 @app.get("/crear-usuario-temporal")
 def crear_usuario_temporal():
@@ -336,3 +340,76 @@ def crear_usuario_temporal():
         return {"mensaje": "Ese usuario ya existe"}
     db.create_user("nombre_usuario", auth.hash_password("SuContraseñaSegura"))
     return {"mensaje": "Usuario creado correctamente"}
+"""
+
+from pydantic import BaseModel
+
+class UserCreate(BaseModel):
+    username: str
+    password: str
+
+
+@app.post("/admin/usuarios")
+def crear_usuario(data: UserCreate, request: Request):
+    redirect = _require_login_or_redirect(request)
+    if redirect:
+        return redirect
+
+    from app import auth
+
+    if db.get_user_by_username(data.username):
+        return {"error": "El usuario ya existe"}
+
+    db.create_user(
+        data.username.strip(),
+        auth.hash_password(data.password)
+    )
+
+    return {"mensaje": "Usuario creado correctamente"}
+
+
+
+class UserUpdate(BaseModel):
+    new_username: str | None = None
+    new_password: str | None = None
+
+
+@app.put("/admin/usuarios/{username}")
+def modificar_usuario(username: str, data: UserUpdate, request: Request):
+    redirect = _require_login_or_redirect(request)
+    if redirect:
+        return redirect
+
+    from app import auth
+
+    user = db.get_user_by_username(username)
+    if not user:
+        return {"error": "Usuario no existe"}
+
+    updated_username = data.new_username or user["username"]
+    updated_password = user["password_hash"]
+
+    if data.new_password:
+        updated_password = auth.hash_password(data.new_password)
+
+    db.update_user(username, {
+        "username": updated_username,
+        "password_hash": updated_password
+    })
+
+    return {"mensaje": "Usuario actualizado correctamente"}
+
+
+@app.delete("/admin/usuarios/{username}")
+def eliminar_usuario(username: str, request: Request):
+    redirect = _require_login_or_redirect(request)
+    if redirect:
+        return redirect
+
+    user = db.get_user_by_username(username)
+    if not user:
+        return {"error": "Usuario no existe"}
+
+    db.delete_user(username)
+
+    return {"mensaje": "Usuario eliminado correctamente"}
