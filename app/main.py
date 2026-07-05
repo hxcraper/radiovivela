@@ -326,3 +326,12 @@ def admin_post_delete(request: Request, post_id: int):
         return redirect
     db.delete_post(post_id)
     return RedirectResponse("/admin", status_code=303)
+
+
+@app.get("/crear-usuario-temporal")
+def crear_usuario_temporal():
+    from app import auth
+    if db.get_user_by_username("nombre_usuario"):
+        return {"mensaje": "Ese usuario ya existe"}
+    db.create_user("nombre_usuario", auth.hash_password("SuContraseñaSegura"))
+    return {"mensaje": "Usuario creado correctamente"}
