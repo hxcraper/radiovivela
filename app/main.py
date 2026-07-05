@@ -23,6 +23,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from app import database as db
 from app import auth
 from app.utils import slugify, make_excerpt, ALLOWED_IMAGE_EXTENSIONS, MAX_IMAGE_BYTES
+app = FastAPI()
 
 BASE_DIR = Path(__file__).resolve().parent
 UPLOADS_DIR = BASE_DIR / "static" / "uploads"
