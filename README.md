@@ -123,10 +123,65 @@ Devuelve el mismo objeto, agregando `content_html` con el contenido completo.
 Solo devuelve noticias con estado **publicado**; los borradores nunca se
 exponen por la API ni por el sitio público.
 
-## 6. Cambiar la contraseña de administrador
+## 6. Gestionar usuarios (crear, editar, eliminar)
 
-Por ahora el cambio de contraseña se hace por línea de comandos (una tarea
-puntual de configuración, no del uso diario). Desde la carpeta del proyecto:
+Todavía no hay una pantalla en el panel para esto — se hace llamando a estos
+endpoints por HTTP, **desde tu computador**, usando `curl` (funciona igual en
+local o contra tu app ya desplegada en Render, sin necesitar Shell ni plan
+pago). Reemplaza `http://localhost:8000` por tu URL de Render si es en
+producción, por ejemplo `https://radiovivela.onrender.com`.
+
+**Paso 1 — Inicia sesión y guarda la cookie de sesión:**
+```bash
+curl -c cookies.txt -X POST http://localhost:8000/admin/login \
+  -d "username=admin&password=TU_CONTRASEÑA_ACTUAL"
+```
+Esto crea un archivo `cookies.txt` que los siguientes comandos usan para
+demostrar que estás autenticado.
+
+**Ver todos los usuarios:**
+```bash
+curl -b cookies.txt http://localhost:8000/admin/usuarios
+```
+
+**Crear un usuario nuevo:**
+```bash
+curl -b cookies.txt -H "Content-Type: application/json" \
+  -X POST http://localhost:8000/admin/usuarios \
+  -d '{"username":"nuevo_usuario","password":"UnaContraseñaSegura123"}'
+```
+
+**Eliminar un usuario** (no puedes eliminar el usuario con el que iniciaste sesión):
+```bash
+curl -b cookies.txt -X DELETE http://localhost:8000/admin/usuarios/nombre_usuario
+```
+
+**Cambiar el nombre y/o la contraseña de un usuario específico:**
+```bash
+curl -b cookies.txt -H "Content-Type: application/json" \
+  -X PUT http://localhost:8000/admin/usuarios/nombre_usuario \
+  -d '{"new_username":"otro_nombre", "new_password":"OtraClave123"}'
+```
+(Puedes mandar solo `new_username`, solo `new_password`, o ambos.)
+
+**Cambiar la contraseña del usuario con el que tienes la sesión iniciada**
+(la forma más simple de cambiar tu propia contraseña de `admin`):
+```bash
+curl -b cookies.txt -H "Content-Type: application/json" \
+  -X PUT http://localhost:8000/admin/cambiar-password \
+  -d '{"new_password":"MiNuevaContraseñaSegura"}'
+```
+
+⚠️ Estos endpoints están protegidos por sesión (tienes que estar logueado para
+usarlos), pero no tienen una capa extra de permisos por rol — cualquier
+usuario logueado puede crear o borrar a otro. Para un equipo pequeño esto es
+razonable; si el equipo crece, conviene agregar roles (ej. solo "admin" puede
+gestionar usuarios).
+
+## 7. Cambiar la contraseña de administrador (método alternativo, por consola)
+
+Si tienes acceso a una consola local o a la Shell de Render (planes pagos),
+también puedes hacerlo así:
 
 ```bash
 python -c "
@@ -149,7 +204,7 @@ export BLOG_SECRET_KEY="una-clave-larga-y-aleatoria"
 uvicorn app.main:app
 ```
 
-## 7. Despliegue en producción
+## 8. Despliegue en producción
 
 - Corre la app detrás de un proceso persistente, por ejemplo con `gunicorn` + `uvicorn.workers.UvicornWorker`, o con `systemd` ejecutando `uvicorn app.main:app --host 0.0.0.0 --port 8000`.
 - Pon un proxy inverso (Nginx / Caddy) delante para servir HTTPS.
@@ -157,7 +212,7 @@ uvicorn app.main:app
 - Haz respaldo periódico del archivo `app/blog.db` y de la carpeta `app/static/uploads/` — ahí vive todo el contenido.
 - Si el hosting solo permite MySQL (no SQLite), lo único que hay que adaptar es `app/database.py`; el resto de la aplicación no cambia.
 
-## 8. Estructura del proyecto
+## 9. Estructura del proyecto
 
 ```
 blog-radio/
@@ -177,7 +232,7 @@ blog-radio/
         └── admin/          # Login, dashboard y formulario de noticias
 ```
 
-## 9. Notas de seguridad (a tener en cuenta antes de producción)
+## 10. Notas de seguridad (a tener en cuenta antes de producción)
 
 - Las contraseñas se guardan con hash `bcrypt`, nunca en texto plano.
 - La sesión de administrador usa una cookie firmada (`httpOnly`), no un token expuesto al JavaScript del cliente.

@@ -95,6 +95,37 @@ def update_user_password(user_id: int, password_hash: str):
         conn.execute("UPDATE users SET password_hash = ? WHERE id = ?", (password_hash, user_id))
 
 
+def get_all_users():
+    with get_conn() as conn:
+        rows = conn.execute(
+            "SELECT id, username, created_at FROM users ORDER BY id"
+        ).fetchall()
+        return [_row_to_dict(r) for r in rows]
+
+
+def delete_user(username: str):
+    with get_conn() as conn:
+        conn.execute("DELETE FROM users WHERE username = ?", (username,))
+
+
+def update_user(username: str, new_username: str | None = None, password_hash: str | None = None):
+    """Actualiza username y/o password_hash de un usuario existente, identificado por su username actual."""
+    with get_conn() as conn:
+        if new_username and password_hash:
+            conn.execute(
+                "UPDATE users SET username = ?, password_hash = ? WHERE username = ?",
+                (new_username, password_hash, username),
+            )
+        elif new_username:
+            conn.execute(
+                "UPDATE users SET username = ? WHERE username = ?", (new_username, username)
+            )
+        elif password_hash:
+            conn.execute(
+                "UPDATE users SET password_hash = ? WHERE username = ?", (password_hash, username)
+            )
+
+
 # ---------------------------------------------------------------------------
 # POSTS
 # ---------------------------------------------------------------------------

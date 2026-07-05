@@ -19,13 +19,11 @@ from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
+from pydantic import BaseModel
 
 from app import database as db
 from app import auth
 from app.utils import slugify, make_excerpt, ALLOWED_IMAGE_EXTENSIONS, MAX_IMAGE_BYTES
-from pydantic import BaseModel
-
-app = FastAPI()
 
 BASE_DIR = Path(__file__).resolve().parent
 UPLOADS_DIR = BASE_DIR / "static" / "uploads"
@@ -40,7 +38,6 @@ app = FastAPI(title="Blog Radio — Panel de noticias")
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY, session_cookie="blogradio_session")
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
-
 
 
 @app.on_event("startup")
@@ -161,9 +158,16 @@ def admin_logout(request: Request):
 
 
 def _require_login_or_redirect(request: Request):
-    """Devuelve None si hay sesión activa, o una RedirectResponse si no la hay."""
+    """Devuelve None si hay sesión activa, o una RedirectResponse si no la hay. Para páginas HTML."""
     if not auth.current_user(request):
         return RedirectResponse("/admin/login", status_code=303)
+    return None
+
+
+def _require_login_json(request: Request):
+    """Igual que arriba, pero para endpoints JSON: devuelve 401 en vez de redirigir a una página."""
+    if not auth.current_user(request):
+        return JSONResponse({"error": "No autenticado. Inicia sesión primero."}, status_code=401)
     return None
 
 
@@ -331,42 +335,17 @@ def admin_post_delete(request: Request, post_id: int):
     db.delete_post(post_id)
     return RedirectResponse("/admin", status_code=303)
 
-""""
 
-@app.get("/crear-usuario-temporal")
-def crear_usuario_temporal():
-    from app import auth
-    if db.get_user_by_username("nombre_usuario"):
-        return {"mensaje": "Ese usuario ya existe"}
-    db.create_user("nombre_usuario", auth.hash_password("SuContraseñaSegura"))
-    return {"mensaje": "Usuario creado correctamente"}
-"""
-
-from pydantic import BaseModel
-
+# =============================================================================
+# ADMIN — GESTIÓN DE USUARIOS (API JSON, de uso interno)
+#
+# No hay pantalla en el panel todavía para esto: se usa llamando a estos
+# endpoints con curl (o similar) desde tu computador, estando logueado.
+# Ver README.md, sección "Gestionar usuarios", para los comandos exactos.
+# =============================================================================
 class UserCreate(BaseModel):
     username: str
     password: str
-
-
-@app.post("/admin/usuarios")
-def crear_usuario(data: UserCreate, request: Request):
-    redirect = _require_login_or_redirect(request)
-    if redirect:
-        return redirect
-
-    from app import auth
-
-    if db.get_user_by_username(data.username):
-        return {"error": "El usuario ya existe"}
-
-    db.create_user(
-        data.username.strip(),
-        auth.hash_password(data.password)
-    )
-
-    return {"mensaje": "Usuario creado correctamente"}
-
 
 
 class UserUpdate(BaseModel):
@@ -374,42 +353,82 @@ class UserUpdate(BaseModel):
     new_password: str | None = None
 
 
-@app.put("/admin/usuarios/{username}")
-def modificar_usuario(username: str, data: UserUpdate, request: Request):
-    redirect = _require_login_or_redirect(request)
+class PasswordUpdate(BaseModel):
+    new_password: str
+
+
+@app.get("/admin/usuarios")
+def listar_usuarios(request: Request):
+    redirect = _require_login_json(request)
     if redirect:
         return redirect
+    return {"usuarios": db.get_all_users()}
 
-    from app import auth
 
-    user = db.get_user_by_username(username)
-    if not user:
-        return {"error": "Usuario no existe"}
-
-    updated_username = data.new_username or user["username"]
-    updated_password = user["password_hash"]
-
-    if data.new_password:
-        updated_password = auth.hash_password(data.new_password)
-
-    db.update_user(username, {
-        "username": updated_username,
-        "password_hash": updated_password
-    })
-
-    return {"mensaje": "Usuario actualizado correctamente"}
+@app.post("/admin/usuarios")
+def crear_usuario(data: UserCreate, request: Request):
+    redirect = _require_login_json(request)
+    if redirect:
+        return redirect
+    username = data.username.strip()
+    if not username or not data.password:
+        return JSONResponse({"error": "Usuario y contraseña son obligatorios."}, status_code=400)
+    if db.get_user_by_username(username):
+        return JSONResponse({"error": "Ese usuario ya existe."}, status_code=409)
+    db.create_user(username, auth.hash_password(data.password))
+    return {"mensaje": f"Usuario '{username}' creado correctamente."}
 
 
 @app.delete("/admin/usuarios/{username}")
 def eliminar_usuario(username: str, request: Request):
-    redirect = _require_login_or_redirect(request)
+    redirect = _require_login_json(request)
+    if redirect:
+        return redirect
+
+    current = auth.current_user(request)
+    if username == current["username"]:
+        return JSONResponse(
+            {"error": "No puedes eliminar el usuario con el que tienes la sesión iniciada."},
+            status_code=400,
+        )
+
+    user = db.get_user_by_username(username)
+    if not user:
+        return JSONResponse({"error": "Ese usuario no existe."}, status_code=404)
+
+    db.delete_user(username)
+    return {"mensaje": f"Usuario '{username}' eliminado correctamente."}
+
+
+@app.put("/admin/usuarios/{username}")
+def modificar_usuario(username: str, data: UserUpdate, request: Request):
+    redirect = _require_login_json(request)
     if redirect:
         return redirect
 
     user = db.get_user_by_username(username)
     if not user:
-        return {"error": "Usuario no existe"}
+        return JSONResponse({"error": "Ese usuario no existe."}, status_code=404)
 
-    db.delete_user(username)
+    new_username = data.new_username.strip() if data.new_username else None
+    if new_username and new_username != username and db.get_user_by_username(new_username):
+        return JSONResponse({"error": "Ya existe otro usuario con ese nombre."}, status_code=409)
 
-    return {"mensaje": "Usuario eliminado correctamente"}
+    password_hash = auth.hash_password(data.new_password) if data.new_password else None
+    db.update_user(username, new_username=new_username, password_hash=password_hash)
+    return {"mensaje": f"Usuario '{username}' actualizado correctamente."}
+
+
+@app.put("/admin/cambiar-password")
+def cambiar_password_propia(data: PasswordUpdate, request: Request):
+    """Cambia la contraseña del usuario que tiene la sesión iniciada (sea 'admin' u otro)."""
+    redirect = _require_login_json(request)
+    if redirect:
+        return redirect
+    current = auth.current_user(request)
+    if not data.new_password or len(data.new_password) < 6:
+        return JSONResponse(
+            {"error": "La nueva contraseña debe tener al menos 6 caracteres."}, status_code=400
+        )
+    db.update_user_password(current["id"], auth.hash_password(data.new_password))
+    return {"mensaje": "Contraseña actualizada correctamente."}
